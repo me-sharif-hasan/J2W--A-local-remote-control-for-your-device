@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
+    <title>J2W -web interface</title>
+</head>
+<body>
+  <div class='view'>
+    <img src="/?get=live" id="window"  style="width:100%;">
+  </div>
+
+<script src="/?get=js&link=jQuery.min.js"></script>
+  <script>
+  function getOrginalCrd(x,y){
+  	var ox=$("#window")[0].naturalWidth;
+  	var oy=$("#window")[0].naturalHeight;
+  	var fx=$("#window")[0].width;
+  	var fy=$("#window")[0].height;
+  	var rx=ox/fx;
+  	var ry=oy/fy;
+  	return [Math.round(rx*x)-30,Math.round(ry*y)-30];
+  }
+  var url=window.location.href;
+  url = "ws://"+url.split("/")[2]+"?get=ws";
+  var socket = new WebSocket(url);
+  socket.onopen = function(e){
+  	console.log("Connected ws");
+  	$("#window").click(function(e){
+  		var opos=getOrginalCrd(e.clientX,e.clientY);
+  		var data="Click:"+opos[0]+","+opos[1];
+  		socket.send(data);
+  	});
+  }
+  </script>
+</body>
+</html>

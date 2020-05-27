@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=false">
+    <title>J2W -web interface</title>
+    <link rel="manifest" href="/?get=file&link=manifest.json"></link>
+    <link rel="stylesheet" href="/?get=file&link=style.css"></link>
+    <style type="text/css">
+      body{
+        position: relative;
+      }
+    </style>
+</head>
+<body>
+  <div class='view'>
+    <img src="/?get=live" id="window"  style="width:100%;">
+    <div id="control" align="center">
+      <div class='micon'>|||</div>
+      <div id="menu">
+      <button id="fullscreen-btn">Fullscreen</button>
+      <button id="mouse-btns">Show mouse buttons</button>
+    </div>
+    </div>
+
+<div id="mouse">
+  <div id="mouse-buttons">
+    <div id="mv-pad" align="center">Move</div>
+    <div class="left btn-group">
+      <button id="leftDown" class="msc" data-event="MouseLeftDown">Down</button>
+      <button id="leftUp" class="msc" data-event="MouseLeftUp">Up</button>
+    </div>
+    <div class="middle btn-group">
+      <button id="middleDown" class="msc" data-event="MouseMiddleDown">Down</button>
+      <button id="middleUp" class="msc" data-event="MouseMiddleUp">Up</button>
+    </div>
+    <div class="right btn-group">
+      <button id="rightDown" class="msc" data-event="MouseRightDown">Down</button>
+      <button id="rightUp" class="msc" data-event="MouseRightUp">Up</button>
+    </div> 
+  </div>
+  <div id="wheel">
+  </div>
+</div>
+
+
+
+      
+    </div>
+  </div>
+
+<script src="/?get=file&link=jQuery.min.js"></script>
+  <script>
+
+
+  var holder={
+    "socket":null,
+    "prev":{
+      "x":0,
+      "y":0
+    },
+    "start":{
+      "x":0,
+      "y":0
+    },
+    "temp":{
+      "x":0,
+      "y":0
+    },
+    "create_ws":function(){
+        var url=window.location.href;
+        url = "ws://"+url.split("/")[2]+"?get=ws";
+        this.socket=new WebSocket(url);
+    },
+    "ws_send":function(data){
+      this.socket.send(data);
+    },
+    "current_operation_name":""
+
+  };
+
+  /*
+  @Function to get the original position of the cursor 
+  */
+  function getOrginalCrd(x,y,rv=false){
+  	var ox=$("#window")[0].naturalWidth;
+  	var oy=$("#window")[0].naturalHeight;
+  	var fx=$("#window")[0].width;
+  	var fy=$("#window")[0].height;
+    x=Math.min(x,fx);
+    y=Math.min(y,fy);
+    var rx,ry;
+    if(rv){
+      rx=fx/ox;
+      ry=fy/oy;
+    }else{
+  	  rx=ox/fx;
+  	  ry=oy/fy;
+    }
+  	return [Math.round(rx*x)-30,Math.round(ry*y)-30];
+  }
+
+
+/*
+@Function to calculate the pointer movements
+*/
+  function getPointerMove(x,y){
+    var past_position=[holder.prev.x,holder.prev.y];
+    var start_position=getOrginalCrd(holder.start.x,holder.start.y);
+    var current_position=getOrginalCrd(x,y);
+    var dx=start_position[0]-current_position[0];
+    var dy=start_position[1]-current_position[1];
+    var next_movex=Math.max(past_position[0]-dx,0);
+    var next_movey=Math.max(past_position[1]-dy);
+    return [next_movex,next_movey];
+  }
+
+
+
+function input_convert(e){
+    var target1;
+    if(e.targetTouches!=undefined){
+      target1=e.targetTouches[0];
+    }else{
+      target1=e;
+    }
+    return target1;
+}
+
+/*
+@Open a socket and set it global so that every function can send data
+*/
+
+
+
+/*
+@Function of the click/tap handler
+*/
+
+function click_handler(e){
+    var opos=getOrginalCrd(e.clientX,e.clientY);
+    var data="Click,$"+opos[0]+"$,$"+opos[1]+"$";
+    holder.ws_send(data);
+}
+
+/*
+@touchmove/mousemove handler
+*/
+function pointer_move(e){
+    var target1=input_convert(e);
+    var x=target1.clientX;
+    var y=target1.clientY;
+    var ops=getPointerMove(x,y);
+    holder.temp.x=ops[0];
+    holder.temp.y=ops[1];
+    var data="PointerMove,$"+ops[0]+"$,$"+ops[1]+"$";
+    holder.current_operation_name="mouse_move";
+    holder.ws_send(data);
+}
+
+function pointer_move_start(e){
+  var target1=input_convert(e);
+  holder.start.x=target1.clientX;
+  holder.start.y=target1.clientY;
+}
+
+function pointer_move_end(e){
+      holder.prev.x=holder.temp.x;
+      holder.prev.y=holder.temp.y;
+}
+
+/*Long press detector for rightClick*/
+function long_press(){
+  holder.ws_send("RightClick,$1$");
+}
+function mouse_action(ac){
+  holder.ws_send(ac+",$1$");
+}
+function mouse_up(){
+  holder.ws_send("MouseUp,$1$");
+}
+
+var lastScrollTop = 0;
+function scroll(e){
+  e=e.targetTouches[0];
+   if(lastScrollTop==0){
+    lastScrollTop=e.clientX;
+   }else{
+    if(e.clientY>lastScrollTop){
+      holder.ws_send("ScrollDown,$1$")
+    }else if(e.clientY<lastScrollTop){
+      holder.ws_send("ScrollUp,$1$")
+    }
+    lastScrollTop=e.clientY;
+   }
+  }
+
+$("#window").on('contextmenu',function(e){
+  long_press();
+  return false;
+});
+
+/*
+@If opening  of W.Socket is successful
+*/
+holder.create_ws();
+
+holder.socket.onopen = function(e){
+  	console.log("connection to web socket is successful");
+    /*
+    @Handle every click event over #window
+    */
+  	$("#window").click(function(e){
+  		click_handler(e);
+  	});
+
+    /*
+    @handle touch/mouse move
+    */
+    $("#window")[0].addEventListener('touchmove',function(e){
+      pointer_move(e);
+    });
+    $("#window").mousemove(function(e){
+      pointer_move(e);
+    });
+
+    /*
+    @Handle every start of the movement 
+    */
+    $("#window")[0].addEventListener('touchstart',function(e){
+      //long_press_detect(true);
+      pointer_move_start(e);
+    });
+    $("#window").mouseover(function (e){
+      pointer_move_start(e);
+    });
+
+    /*
+    @Handle every end of the movement 
+    */
+    $("#window")[0].addEventListener('touchend',function(e){
+      pointer_move_end(e);
+    });
+    $("#window").mouseout(function(e){
+      pointer_move_end(e);
+    });
+
+    $(".msc").on('click',function(e){
+      mouse_action($(e.target).data('event'));
+    });
+
+    $("#wheel")[0].addEventListener('touchmove',function(e){
+      scroll(e);
+    });
+
+  }
+
+
+
+
+/*
+@Controller functions bellow
+*/
+/*
+@Implementing of fullscreen function
+*/
+$("#fullscreen-btn")[0].addEventListener("click",function(){
+  if(!document.fullscreenElement){
+    $("body")[0].requestFullscreen();
+    $("#fullscreen-btn").text("Rotate");
+  }
+  else{
+    document.exitFullscreen;
+    $("#fullscreen-btn").text("Press esc/back button");
+  }
+  screen.orientation.lock("landscape-primary");
+});
+
+
+
+
+
+/*UI elements*/
+var isMenuOpen=false;
+$("#control").click(function(e){
+  if(isMenuOpen){
+    $('#menu').hide();
+    isMenuOpen=false;
+  }else{
+    $('#menu').show();
+    isMenuOpen=true;
+  }
+});
+
+var isMouseButtonOpen=false;
+$("#mouse-btns").click(function(e){
+  if(!isMouseButtonOpen){
+    $("#mouse-btns").text("Hide mouse buttons");
+    $("#mouse").show();
+    isMouseButtonOpen=true;
+  }else{
+    $("#mouse-btns").text("Show mouse buttons");
+    $("#mouse").hide();
+    $('div').attr('style', '');
+    isMouseButtonOpen=false;
+  }
+});
+
+function move(elem,e){
+    elem.css("bottom","");
+    elem.css('margin-left',e.touches[0].clientX);
+    elem.css('top',e.touches[0].clientY);
+}
+
+$("#mv-pad")[0].addEventListener("touchmove",function(e){
+  move($("#mouse"),e);
+});
+  </script>
+</body>
+</html>

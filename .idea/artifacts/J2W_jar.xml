@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="J2W:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/J2W_jar</output-path>
+    <root id="archive" name="J2W.jar">
+      <element id="module-output" name="J2W" />
+    </root>
+  </artifact>
+</component>
