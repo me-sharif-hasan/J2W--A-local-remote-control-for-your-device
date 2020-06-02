@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="apk" build-on-make="true" name="apk">
+    <output-path>$PROJECT_DIR$/out/artifacts/apk</output-path>
+    <properties id="android-properties">
+      <options>
+        <option name="keyStoreUrl" value="file://" />
+        <option name="runProGuard" value="true" />
+      </options>
+    </properties>
+    <properties id="ant-preprocessing">
+      <options enabled="true" />
+    </properties>
+    <root id="archive" name="apk.apk" />
+  </artifact>
+</component>
