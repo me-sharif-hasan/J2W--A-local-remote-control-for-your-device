@@ -5,6 +5,7 @@ import me.iishanto.image.Capture;
 import me.iishanto.system.EventProcessor;
 
 import java.io.*;
+import java.net.URL;
 import java.util.Scanner;
 
 public class ClientRequestProcessor {
@@ -35,12 +36,12 @@ public class ClientRequestProcessor {
             if (httpParser._Get.get("get").equals("live")) {
                 new Thread(new Capture(outputStream)).start();
             } else if (httpParser._Get.get("get").equals("file")) {
-                sendData(Toolkit.getInstance().getDir() + "/html/" + (String) httpParser._Get.get("link"));
+                sendData(Toolkit.getInstance().getResource("/html/"+(String) httpParser._Get.get("link")));
             } else if (httpParser._Get.get("get").equals("ws")) {
                 ws("text/html");
             }
         } else {
-            sendData(Toolkit.getInstance().getDir() + "/html/index.html");
+            sendData(Toolkit.getInstance().getResource("/html/index.html"));
         }
     }
 
@@ -59,14 +60,11 @@ public class ClientRequestProcessor {
         }
     }
 
-
-    private void sendData(String link) {
-        try {
-            httpSendData.send(new File(link));
-            httpSendData.closeOutputStream();
-        } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage() + " exception in SystemController.java: " + 92);
-            Thread.currentThread().interrupt();
-        }
+    private void sendData(URL file){
+        File f=Toolkit.getInstance().URL2File(file);
+        httpSendData.setContentType(Toolkit.getInstance().getFileMimeType(file));
+        httpSendData.send(f);
+        httpSendData.closeOutputStream();
+        f.delete();
     }
 }

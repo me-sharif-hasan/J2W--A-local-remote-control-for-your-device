@@ -15,6 +15,7 @@ public class Main {
         System.out.println(Toolkit.getInstance().getDir());
         JFrame jFrame=createWindow();
         Label label1 = new Label("Port: ",SwingConstants.CENTER);
+
         label1.setBounds(100,100,50,30);
         label1.setBackground(Color.lightGray);
         JTextField jTextFieldForPort=new JTextField(20);

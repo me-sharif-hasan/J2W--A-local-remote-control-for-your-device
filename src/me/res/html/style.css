@@ -64,3 +64,11 @@
   overflow: scroll;
   z-index: 100;
 }
+
+
+
+#keyboard{
+  display: none;
+  position: fixed;
+  width: 100%;
+}

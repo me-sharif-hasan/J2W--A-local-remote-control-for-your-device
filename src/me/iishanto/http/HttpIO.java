@@ -89,6 +89,9 @@ public class HttpIO {
         sendToOs(s);
         return 0;
     }
+    public long send(InputStream fsi){
+        return 0;
+    }
     private void sendToOs(String s){
         try {
             outputStream.write(s.getBytes());

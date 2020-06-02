@@ -1,5 +1,6 @@
 package me.iishanto.system;
 
+import me.iishanto.HardwareSimulators.Keyboard;
 import me.iishanto.HardwareSimulators.Mouse;
 import me.iishanto.http.Websocket;
 
@@ -8,9 +9,11 @@ import java.io.OutputStream;
 
 public class EventProcessor extends Websocket {
     Mouse mouse;
+    Keyboard keyboard;
     public EventProcessor(InputStream inputStream, OutputStream outputStream){
         super(inputStream,outputStream);
         mouse=new Mouse();
+        keyboard=new Keyboard();
         super.registerChild(this);
     }
     public void run(){
@@ -22,10 +25,10 @@ public class EventProcessor extends Websocket {
 
 
     private void job(String s){
+        System.out.println(s);
         try {
-            //System.out.println(s);
             String []parts=s.split(",");
-            String X,Y;int x=0,y=0;
+            String X="",Y="";int x=0,y=0;
             try {
                 X=clean(parts[1]);
                 Y=clean(parts[2]);
@@ -53,6 +56,8 @@ public class EventProcessor extends Websocket {
                 mouse.scrollUp();
             }else if(parts[0].equals("ScrollDown")){
                 mouse.scrollDown();
+            }else if(parts[0].equals("keyboard")){
+               keyboard.handle(X.charAt(0));
             }
         }catch (Exception e){
             System.out.println(e.getLocalizedMessage()+" exception in WebsocketHandler.java: "+67);

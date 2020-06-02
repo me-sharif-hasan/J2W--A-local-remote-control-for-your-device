@@ -1,8 +1,11 @@
 package me.iishanto;
 
 import javax.swing.*;
-import java.io.File;
+import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.Base64;
 
@@ -64,12 +67,55 @@ public class Toolkit {
         return decode;
     }
 
+    public URL getResource(String s){
+        return this.getClass().getResource(s);
+    }
+    public File URL2File(URL fr){
+        File temp=null;
+        try {
+            InputStream is=fr.openStream();
+            temp=File.createTempFile(String.valueOf(System.currentTimeMillis()),".tmp");
+            OutputStream os=new FileOutputStream(temp);
+            os.write(is.readAllBytes());
+            temp.deleteOnExit();
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return temp;
+    }
+
+    public String getFileMimeType(URL fr){
+        String type="";
+        try {
+            type=Files.probeContentType(Paths.get(fr.getPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return type;
+    }
+    public InputStream getResourceStream(URL fr){
+        InputStream is=null;
+        try {
+            is=fr.openStream();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return is;
+    }
     public File getCursor(){
-        String cursorLoc = "/html/cursor.png";
-        return new File(Toolkit.getInstance().getDir()+ cursorLoc);}
+        URL cursorUrl=getResource("/html/cursor.png");
+        return URL2File(cursorUrl);
+    }
     public ImageIcon icon(){
-        String icon = "/res/icon.png";
-        return new ImageIcon(getDir()+ icon);
+        byte []iconBytes=null;
+        try {
+            URL iconURL=getResource("/icon.png");
+            iconBytes=getResourceStream(iconURL).readAllBytes();
+        }catch (Exception e){
+
+        }
+        return new ImageIcon(iconBytes);
     }
     public static Toolkit getInstance(){
         if(instance==null) {
