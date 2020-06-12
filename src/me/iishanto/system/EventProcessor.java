@@ -2,6 +2,7 @@ package me.iishanto.system;
 
 import me.iishanto.HardwareSimulators.Keyboard;
 import me.iishanto.HardwareSimulators.Mouse;
+import me.iishanto.http.HttpIO;
 import me.iishanto.http.Websocket;
 
 import java.io.InputStream;
@@ -12,6 +13,13 @@ public class EventProcessor extends Websocket {
     Keyboard keyboard;
     public EventProcessor(InputStream inputStream, OutputStream outputStream){
         super(inputStream,outputStream);
+        init();
+    }
+    public EventProcessor(HttpIO httpIO){
+        super(httpIO.getInputStream(),httpIO.getOutputStream());
+        init();
+    }
+    private void init(){
         mouse=new Mouse();
         keyboard=new Keyboard();
         super.registerChild(this);
@@ -25,7 +33,7 @@ public class EventProcessor extends Websocket {
 
 
     private void job(String s){
-        System.out.println(s);
+       /// System.out.println(s);
         try {
             String []parts=s.split(",");
             String X="",Y="";int x=0,y=0;
@@ -52,6 +60,10 @@ public class EventProcessor extends Websocket {
                 mouse.leftButtonDown();
             }else if(parts[0].equals("MouseLeftUp")){
                 mouse.leftButtonUp();
+            }else if(parts[0].equals("MouseRightDown")){
+                mouse.rightButtonDown();
+            }else if(parts[0].equals("MouseRightUp")){
+                mouse.rightButtonUp();
             }else if(parts[0].equals("ScrollUp")){
                 mouse.scrollUp();
             }else if(parts[0].equals("ScrollDown")){

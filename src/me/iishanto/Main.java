@@ -8,10 +8,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
+
         System.out.println(Toolkit.getInstance().getDir());
         JFrame jFrame=createWindow();
         Label label1 = new Label("Port: ",SwingConstants.CENTER);
@@ -23,7 +25,12 @@ public class Main {
         jTextFieldForPort.setBorder(new LineBorder(Color.gray,0));
         jTextFieldForPort.setText("8080");
 
-        JTextArea console=new JTextArea("System ready\n");
+        JTextArea jTextAreaForIP = new JTextArea();
+        jTextAreaForIP.setBounds(0 ,200, 500,500);
+
+        List<String> lst= Toolkit.getInstance().getIp();
+        jTextAreaForIP.setText("Ready\n");
+        jTextAreaForIP.setText("Start the server please\n");
 
         JButton jButtonOne=new JButton("Start server");
         JButton jButtonTwo=new JButton("Exit");
@@ -58,17 +65,22 @@ public class Main {
                         t = new Thread(j2wServer);
                         t.start();
                         jButtonOne.setText("Stop");
+                        jTextAreaForIP.append("Server started at port: "+Toolkit.getInstance().getPort()+"\n\n");
+                        jTextAreaForIP.append("Browse from your browser by one of those addresses:\n");
+                        showIp(jTextAreaForIP);
                     }else{
                         if(t!=null){
                             j2wServer.serverStop();
                             j2wServer=null;
                             t.interrupt();
                             jButtonOne.setText("Start server");
+                            jTextAreaForIP.setText("Server closed!\nStart again please\n");
                         }else{
                             Toolkit.getInstance().alert("You must run the server first");
                         }
                     }
                 }catch (Exception x){
+                    jTextAreaForIP.setText(x.getLocalizedMessage());
                     JOptionPane.showMessageDialog(null,"Error: "+x.getLocalizedMessage());
                 }
             }
@@ -78,6 +90,7 @@ public class Main {
         jFrame.add(jButtonTwo);
         jFrame.add(jTextFieldForPort);
         jFrame.add(label1);
+        jFrame.add(jTextAreaForIP);
         jFrame.setVisible(true);
     }
     private static JFrame createWindow(){
@@ -92,5 +105,11 @@ public class Main {
     private static void closeWindow(JFrame jFrame){
         jFrame.setVisible(false);
         jFrame.dispose();
+    }
+    private static void showIp(JTextArea jTextArea){
+        List<String> lst=Toolkit.getInstance().getIp();
+        for(String a:lst){
+            jTextArea.append("-->http://"+a+"\n");
+        }
     }
 }

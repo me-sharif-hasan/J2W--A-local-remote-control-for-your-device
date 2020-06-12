@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpParser {
-    private String[] lines;
-    public Map _Get = new HashMap();
-    public Map _Header = new HashMap();
+    private final String[] lines;
+    public Map<String, String> _Get = new HashMap<>();
+    public Map<String, String> _Header = new HashMap<>();
 
     public HttpParser(String header) {
         lines = explode(header);
@@ -33,14 +33,12 @@ public class HttpParser {
 
     public void parseGet() {
         String[] span = get(0).split(" ");
-        String param = "";
+        StringBuilder param = new StringBuilder();
         if (span[0].equals("GET") && span[1].length() != 1) {
-            for (int i = 2; i < span[1].length(); i++) {
-                param += span[1].charAt(i);
-            }
-            String[] params = param.split("&");
-            for (int i = 0; i < params.length; i++) {
-                String[] ln = params[i].split("=");
+            for (int i = 2; i < span[1].length(); i++) param.append(span[1].charAt(i));
+            String[] params = param.toString().split("&");
+            for (String s : params) {
+                String[] ln = s.split("=");
                 if (ln.length < 2) continue;
                 _Get.put(ln[0], ln[1]);
             }

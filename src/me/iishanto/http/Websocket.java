@@ -1,14 +1,12 @@
 package me.iishanto.http;
 
-import me.iishanto.HardwareSimulators.Mouse;
 import me.iishanto.Toolkit;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class Websocket extends Thread {
-    private InputStream is;
-    private OutputStream os;
-    private Mouse mouse=new Mouse();
+    private final InputStream is;
+    private final OutputStream os;
     Websocket childClass=null;
     public Websocket(InputStream inputStream, OutputStream outputStream){
         is=inputStream;
@@ -23,7 +21,7 @@ public class Websocket extends Thread {
     }
 
     protected void read(){
-        int read=-1;
+        int read;
         byte []buff=new byte[1024];
         while (true){
             try {

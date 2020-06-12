@@ -18,6 +18,13 @@ public class Mouse {
     public void leftButtonUp(){
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
     }
+    public void rightButtonDown(){
+        robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
+    }
+    public void rightButtonUp(){
+        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
+    }
+
     public void leftClick(int x,int y){
         robot.mouseMove(x, y);
         leftButtonDown();
@@ -43,4 +50,5 @@ public class Mouse {
     public int getY(){
         return (int)Math.round(MouseInfo.getPointerInfo().getLocation().getY());
     }
+
 }

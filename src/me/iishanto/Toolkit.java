@@ -2,16 +2,19 @@ package me.iishanto;
 
 import javax.swing.*;
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.Base64;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Toolkit {
     private static Toolkit instance=null;
-    private String wshash="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    private final String wsHash="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     private String key=null;
     private String wsPrimary=null;
     private int serverPort=8080;
@@ -24,7 +27,7 @@ public class Toolkit {
     public void calculate(String primary){
         try {
             wsPrimary = primary;
-            this.key=Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest((wsPrimary + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").getBytes(StandardCharsets.UTF_8)));
+            this.key=Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest((wsPrimary + wsHash).getBytes(StandardCharsets.UTF_8)));
         }catch(Exception e){
             System.out.println(e.getLocalizedMessage()+" exception in Toolkit.java: "+24);
         }
@@ -80,7 +83,7 @@ public class Toolkit {
             temp.deleteOnExit();
             os.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getLocalizedMessage());
         }
         return temp;
     }
@@ -90,7 +93,7 @@ public class Toolkit {
         try {
             type=Files.probeContentType(Paths.get(fr.getPath()));
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getLocalizedMessage());
         }
         return type;
     }
@@ -99,7 +102,7 @@ public class Toolkit {
         try {
             is=fr.openStream();
         }catch (Exception e){
-            e.printStackTrace();
+            System.err.println(e.getLocalizedMessage());
         }
         return is;
     }
@@ -110,13 +113,39 @@ public class Toolkit {
     public ImageIcon icon(){
         byte []iconBytes=null;
         try {
-            URL iconURL=getResource("/icon.png");
+            URL iconURL=getResource("/icon.jpg");
             iconBytes=getResourceStream(iconURL).readAllBytes();
         }catch (Exception e){
-
+            System.err.println(e.getLocalizedMessage());
         }
         return new ImageIcon(iconBytes);
     }
+
+    public List<String> getIp(){
+        List<String> ips=new LinkedList<>();
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface interFace = interfaces.nextElement();
+                if (interFace.isLoopback() || !interFace.isUp())
+                    continue;
+
+                Enumeration<InetAddress> addresses = interFace.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if (address instanceof Inet6Address) continue;
+                    ips.add(address.getHostAddress() + ":" + getPort());
+                }
+            }
+            ips.add("localhost:"+getPort());
+            ips.add("127.0.0.1:"+getPort());
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
+        return ips;
+    }
+
+
     public static Toolkit getInstance(){
         if(instance==null) {
             instance = new Toolkit();

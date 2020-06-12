@@ -2,31 +2,31 @@ package me.iishanto.http;
 
 import me.iishanto.Toolkit;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Scanner;
+import java.io.*;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class HttpIO {
+    private final OutputStream outputStream;
     private InputStream inputStream;
-    public OutputStream outputStream;
     boolean websocket=false;
     private String headers="";
     private String contentType="";
-    private String wsKey="";
+    private final Map<java.lang.constant.Constable, Serializable> headerList= new HashMap<>();
+
     public HttpIO(InputStream is, OutputStream os){
-        inputStream=is;
         outputStream=os;
+        inputStream=is;
     }
+    public HttpIO(OutputStream os){outputStream=os;}
     public void setAsWebsocket(String Sec_WebSocket_Key){
         if (Sec_WebSocket_Key == null) {
             return;
         }
         if (Sec_WebSocket_Key.charAt(0) == ' ') {
-            Sec_WebSocket_Key = Sec_WebSocket_Key.substring(1, Sec_WebSocket_Key.length());
+            Sec_WebSocket_Key = Sec_WebSocket_Key.substring(1);
         }
         if (Sec_WebSocket_Key.charAt(Sec_WebSocket_Key.length() - 1) == ' ') {
             Sec_WebSocket_Key = Sec_WebSocket_Key.substring(0, Sec_WebSocket_Key.length() - 1);
@@ -34,25 +34,30 @@ public class HttpIO {
         Toolkit.getInstance().calculate(Sec_WebSocket_Key);
         websocket=true;
     }
-    public void setAsHttp(){
-        websocket=false;
-    }
+
     private void setHeaders(){
+        StringBuilder stringBuilder=new StringBuilder();
         if(websocket){
-            headers="HTTP/1.1 101 Switching Protocols\r\n" +
-                    "Upgrade: websocket\r\n" +
-                    "Connection: Upgrade\r\n" +
-                    "Sec-WebSocket-Accept: " + Toolkit.getInstance().getWsKey() +
-                    "\r\n\r\n";
+            stringBuilder.append("HTTP/1.1 101 Switching Protocols\r\n");
+            stringBuilder.append("Upgrade: websocket\r\n");
+            stringBuilder.append("Connection: Upgrade\r\n");
+            stringBuilder.append("Sec-WebSocket-Accept: ").append(Toolkit.getInstance().getWsKey());
+            stringBuilder.append("\r\n\r\n");
         }else{
-            headers="HTTP/1.1 200 OK\r\n" +
-                    "Content-Type: " + contentType + "\r\n" +
-                    "\r\n\r\n";
+            Iterator<Map.Entry<java.lang.constant.Constable, Serializable>> it = headerList.entrySet().iterator();
+            stringBuilder.append("HTTP/1.1 200 OK\r\n");
+            while (it.hasNext()) {
+                Map.Entry<java.lang.constant.Constable, Serializable> pair = it.next();
+                stringBuilder.append(pair.getKey()).append(":").append(pair.getValue()).append("\r\n");
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+            stringBuilder.append("\r\n");
         }
+        headers=stringBuilder.toString();
     }
     public void sendHeaders(){
         setHeaders();
-        sendToOs(headers);
+        sendToOs(headers.getBytes());
     }
     public void closeOutputStream(){
         try {
@@ -61,43 +66,63 @@ public class HttpIO {
             System.out.println("Exception in HttpSendData line 50: "+e.getLocalizedMessage());
         }
     }
-    public void setContentType(String type){
-        contentType=type;
+    public void prepareHeaders(String type,String value){
+        headerList.put(type,value);
     }
-    public long send(File file){
-        if(contentType.equals("")){
-            try {
-                contentType= Files.probeContentType(Path.of(file.getAbsolutePath()));
-            } catch (IOException e) {
-                System.out.println("Exception in HttpSendData line 49: "+e.getLocalizedMessage());
-            }
-        }
+    public void prepareHeaders(String type,long value){
+        headerList.put(type,value);
+    }
+    public void send(URL url){
+        File file=Toolkit.getInstance().URL2File(url);
         try {
+            byte []buff=new FileInputStream(file).readAllBytes();
+            if (contentType.equals("")) {
+                try {
+                    contentType = Toolkit.getInstance().getFileMimeType(url);
+                    prepareHeaders("Content-Type",contentType);
+                    prepareHeaders("Content-Length",buff.length);
+                } catch (Exception e) {
+                    System.out.println("Exception in HttpSendData line 49: " + e.getLocalizedMessage());
+                }
+            }
             sendHeaders();
-            String data = "";
-            Scanner scanner = new Scanner(file);
-            while (scanner.hasNextLine()) {
-                sendToOs(scanner.nextLine() + "\n");
-            }
+            sendToOs(buff);
         }catch (Exception e){
-            System.out.println("Exception in HttpSendData line 60: "+e.getLocalizedMessage());
+            System.out.println("Exception in HttpSendData line 77: "+e.getLocalizedMessage());
         }
-        return 0;
     }
-    public long send(String s){
-        sendHeaders();
-        sendToOs(s);
-        return 0;
+    public void sendToOs(byte []buff){
+        sendBinary(buff);
+        flush();
     }
-    public long send(InputStream fsi){
-        return 0;
-    }
-    private void sendToOs(String s){
+    public boolean sendBinary(byte []buff) {
         try {
-            outputStream.write(s.getBytes());
-            outputStream.flush();
-        }catch (Exception e){
-            System.out.println("Exception in HttpSendData line 79: "+e.getLocalizedMessage());
+            outputStream.write(buff);
+            return true;
+        } catch (IOException e) {
+            System.err.println(e.getLocalizedMessage());
         }
+        return false;
+    }
+    public void flush(){
+        try {
+            outputStream.flush();
+        } catch (IOException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
+    }
+    public long getData(byte[] buff){
+        try {
+            return inputStream.read(buff);
+        }catch (Exception e){
+            System.err.println(e.getLocalizedMessage());
+        }
+        return -1;
+    }
+    public InputStream getInputStream(){
+        return inputStream;
+    }
+    public OutputStream getOutputStream(){
+        return outputStream;
     }
 }
