@@ -38,12 +38,16 @@ public class EventProcessor extends Websocket {
             String []parts=s.split(",");
             String X="",Y="";int x=0,y=0;
             try {
-                X=clean(parts[1]);
-                Y=clean(parts[2]);
-                x=Integer.parseInt(X);
-                y=Integer.parseInt(Y);
+                if(parts.length>=2) {
+                    X = clean(parts[1]);
+                    x=Integer.parseInt(X);
+                }
+                if(parts.length>=3) {
+                    Y = clean(parts[2]);
+                    y = Integer.parseInt(Y);
+                }
             }catch (Exception e){
-                System.out.println(e.getLocalizedMessage()+" exception in WebsocketHandler.java: "+40);
+                System.out.println(e.getLocalizedMessage());
             }
             int px=mouse.getX();
             int py=mouse.getY();
@@ -72,7 +76,7 @@ public class EventProcessor extends Websocket {
                keyboard.handle(X.charAt(0));
             }
         }catch (Exception e){
-            System.out.println(e.getLocalizedMessage()+" exception in WebsocketHandler.java: "+67);
+            System.err.println(e.getLocalizedMessage());
         }
     }
 

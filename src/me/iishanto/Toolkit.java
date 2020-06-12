@@ -137,14 +137,14 @@ public class Toolkit {
                     ips.add(address.getHostAddress() + ":" + getPort());
                 }
             }
-            ips.add("localhost:"+getPort());
-            ips.add("127.0.0.1:"+getPort());
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
         return ips;
     }
-
+    public void log(String s){
+        Main.log(s);
+    }
 
     public static Toolkit getInstance(){
         if(instance==null) {

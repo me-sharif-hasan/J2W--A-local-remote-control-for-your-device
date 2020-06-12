@@ -39,7 +39,7 @@ public class Websocket extends Thread {
                     System.out.println(new String(decoded));
                 }
             }catch (Exception e){
-                System.out.println(e.getLocalizedMessage()+" exception in WebsocketHandler.java: "+88);
+                System.err.println(e.getLocalizedMessage());
                 break;
             }
         }

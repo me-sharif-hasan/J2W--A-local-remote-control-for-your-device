@@ -21,6 +21,7 @@ public class J2wServer extends Thread {
         listening=true;
         while (true){
             Socket socket=serverSocket.accept();
+            Toolkit.getInstance().log("Client "+socket.getRemoteSocketAddress()+" connected\n");
             connections.add(socket);
             new Thread(new Runnable() {
                 @Override

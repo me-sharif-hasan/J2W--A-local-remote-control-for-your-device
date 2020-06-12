@@ -72,6 +72,9 @@ var state=false;
 $(".ico-mouse").click(function () {
     $(".mouse-buttons").toggleClass('hide');
 });
+$(".ico-fullscreen").click(function(){
+    toggleFullScreen($("body")[0]);
+});
 
 $(".movable").on("touchmove",function(e){
     let elem = $($(e.currentTarget).data("target"));
