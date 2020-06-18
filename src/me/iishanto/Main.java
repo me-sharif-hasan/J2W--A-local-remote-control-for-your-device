@@ -26,6 +26,7 @@ public class Main {
         jTextFieldForPort.setBounds(155,100,300,30);
         jTextFieldForPort.setBorder(new LineBorder(Color.gray,0));
         jTextFieldForPort.setText("8080");
+        jTextFieldForPort.setCaretPosition(jTextFieldForPort.getDocument().getLength());
 
         setConsole(jFrame);
         console.setText("Ready\n");
@@ -107,12 +108,17 @@ public class Main {
     }
     private static void showIp(JTextArea jTextArea){
         List<String> lst=Toolkit.getInstance().getIp();
+        if(lst.size()==0){
+            jTextArea.append("please connect to lan network: no connection found\n");
+        }
         for(String a:lst){
             jTextArea.append("-->http://"+a+"\n");
         }
     }
     private static void setConsole(JFrame jFrame){
         console = new JTextArea();
+        console.setEditable(false);
+        console.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
         console.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -130,6 +136,7 @@ public class Main {
             }
         });
         JScrollPane scrollPane=new JScrollPane(console);
+        scrollPane.setBorder(null);
         scrollPane.setBounds(0,200,501,274);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
