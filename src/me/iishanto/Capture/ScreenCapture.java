@@ -4,10 +4,13 @@ import me.iishanto.Toolkit;
 import me.iishanto.http.HttpIO;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 
 public class ScreenCapture extends Thread {
     OutputStream outputStream;
@@ -44,6 +47,11 @@ public class ScreenCapture extends Thread {
                 boolean sendData=httpIO.sendBinary(tmp.toByteArray());
                 if(!(sendData&&sendHead)){
                     break;
+                }
+                try {
+                    TimeUnit.MILLISECONDS.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
     }
