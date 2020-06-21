@@ -33,7 +33,7 @@ public class EventProcessor extends Websocket {
 
 
     private void job(String s){
-       /// System.out.println(s);
+        //System.out.println(s);
         try {
             String []parts=s.split(",");
             String X="",Y="";int x=0,y=0;
@@ -72,8 +72,10 @@ public class EventProcessor extends Websocket {
                 mouse.scrollUp();
             }else if(parts[0].equals("ScrollDown")){
                 mouse.scrollDown();
-            }else if(parts[0].equals("keyboard")){
-               keyboard.handle(X.charAt(0));
+            }else if(parts[0].equals("KbdUp")){
+               keyboard.handle(x,false);
+            }else if(parts[0].equals("KbdDown")){
+                keyboard.handle(x,true);
             }
         }catch (Exception e){
             System.err.println(e.getLocalizedMessage());

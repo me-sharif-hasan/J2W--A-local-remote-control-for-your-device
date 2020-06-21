@@ -119,3 +119,21 @@ $(".touchpad").on("mouseout touchend",function (e) {
 /*
 @End of mouse pointer simulator
  */
+
+
+$('div[class^="key--"]').on("touchstart touchend",function(e){
+/*
+
+    */
+    var actionType=e.handleObj.type;
+    var target=$(e.currentTarget);
+        key=target.data("key");
+        if(key==undefined){
+            key=target.data("char").charCodeAt(0);
+        }
+        if(actionType=='touchstart'){
+            holder.ws_send("KbdDown,$"+key+"$");
+        }else{
+            holder.ws_send("KbdUp,$"+key+"$");
+        }
+});

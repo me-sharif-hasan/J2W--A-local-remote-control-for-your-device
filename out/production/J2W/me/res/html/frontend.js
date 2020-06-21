@@ -72,6 +72,9 @@ var state=false;
 $(".ico-mouse").click(function () {
     $(".mouse-buttons").toggleClass('hide');
 });
+$(".ico-keyboard").click(function () {
+    $(".keyboard").toggleClass('hide');
+});
 $(".ico-fullscreen").click(function(){
     toggleFullScreen($("body")[0]);
 });
@@ -82,3 +85,13 @@ $(".movable").on("touchmove",function(e){
     elem.css('margin-left',e.originalEvent.touches[0].clientX);
     elem.css('top',e.originalEvent.touches[0].clientY);
 });
+
+$(window).on('resize', function (e) {
+    size();
+});
+size();
+
+function size () {
+  var size = $(".keyboard")[0].parentNode.clientWidth / 90;
+  $(".keyboard")[0].style.fontSize = size + 'px';
+  }

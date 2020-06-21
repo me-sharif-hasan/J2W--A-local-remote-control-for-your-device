@@ -11,7 +11,11 @@ public class Keyboard {
             e.printStackTrace();
         }
     }
-    public void handle(char ch){
-        System.err.println("You pressed "+ch+" make a way out for keyboard handling");
+    public void handle(int key,boolean isDown){
+        if(isDown){
+            robot.keyPress(key);
+        }else{
+            robot.keyRelease(key);
+        }
     }
 }
