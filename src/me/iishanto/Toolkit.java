@@ -19,9 +19,13 @@ public class Toolkit {
     private String wsPrimary=null;
     private int serverPort=8080;
     private final String dir=System.getProperty("user.dir")+"/src/me";
+    private long startTime=System.currentTimeMillis();
+    private long totalDataTransfer=0;
+
+    public String SPEED="0.0";
 
     private Toolkit(){
-        //
+        showDataTransferSpeed();
     }
 
     public void calculate(String primary){
@@ -141,6 +145,37 @@ public class Toolkit {
             throw new RuntimeException(e);
         }
         return ips;
+    }
+
+    public void dataTransfer(long speedInBps){
+        totalDataTransfer+=speedInBps;
+    }
+
+    public void showDataTransferSpeed() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long pastTime = System.currentTimeMillis();
+                long oldDataTransfer = totalDataTransfer;
+                long resetLimit=100000000000000000L;
+                while (true) {
+                    if(totalDataTransfer>=resetLimit){
+                        totalDataTransfer=0;
+                        log("Total "+resetLimit+" bytes data transferred\n");
+                        continue;
+                    }
+                    long now = System.currentTimeMillis();
+                    if (now - pastTime >= 1000) {
+                        double transferSpeed = totalDataTransfer-oldDataTransfer;
+                        transferSpeed /= 1024.0*1024.0;
+                        String speed=String.format("%.2f",transferSpeed);
+                        oldDataTransfer = totalDataTransfer;
+                        pastTime = now;
+                        SPEED=speed;
+                    }
+                }
+            }
+        }).start();
     }
     public void log(String s){
         Main.log(s);

@@ -98,6 +98,7 @@ public class HttpIO {
     public boolean sendBinary(byte []buff) {
         try {
             outputStream.write(buff);
+            Toolkit.getInstance().dataTransfer(buff.length);
             return true;
         } catch (IOException e) {
             System.err.println(e.getLocalizedMessage());

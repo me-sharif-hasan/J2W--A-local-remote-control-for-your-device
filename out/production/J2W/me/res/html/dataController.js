@@ -60,8 +60,8 @@ $(".sim").on("touchend",function (e) {
     holder.ws_send($(e.currentTarget).data('event')+"Up,$1$");
 })
 cast.click(function () {
-    holder.ws_send("MouseLeftDown,$1$");
-    holder.ws_send("MouseLeftUp,$1$");
+    holder.ws_send("Click,$1$");
+    //holder.ws_send("MouseLeftUp,$1$");
 });
 cast.on("contextmenu",function (e) {
     holder.ws_send("MouseRightDown,$1$");

@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     private static JTextArea console;
@@ -19,9 +20,30 @@ public class Main {
         System.out.println(Toolkit.getInstance().getDir());
         JFrame jFrame=createWindow();
         Label label1 = new Label("Port: ",SwingConstants.CENTER);
+        Label speedMeter = new Label("Speed ",SwingConstants.CENTER);
 
         label1.setBounds(100,100,50,30);
         label1.setBackground(Color.lightGray);
+
+        speedMeter.setBounds(430,0,70,30);
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    speedMeter.setText(Toolkit.getInstance().SPEED+" MB/s");
+                    try{
+                        TimeUnit.MILLISECONDS.sleep(1000);
+                    }catch (Exception e){
+
+                    }
+                }
+            }
+        }).start();
+
+
+
         JTextField jTextFieldForPort=new JTextField(20);
         jTextFieldForPort.setBounds(155,100,300,30);
         jTextFieldForPort.setBorder(new LineBorder(Color.gray,0));
@@ -90,6 +112,7 @@ public class Main {
         jFrame.add(jButtonTwo);
         jFrame.add(jTextFieldForPort);
         jFrame.add(label1);
+        jFrame.add(speedMeter);
         jFrame.setVisible(true);
     }
     private static JFrame createWindow(){
